@@ -1,0 +1,1126 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DriveLab OS | Enterprise Suite v9.1</title>
+    
+    <!-- Dependencias Estables -->
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/framer-motion@10.16.4/dist/framer-motion.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/lucide-react@0.292.0/dist/umd/lucide-react.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    
+    <style>
+        :root {
+            /* PALETA APPLE */
+            --apple-blue: #007AFF;
+            --apple-green: #34C759;
+            --apple-orange: #FF9500;
+            --apple-red: #FF3B30;
+            --apple-bg: #F5F5F7; 
+            --apple-card: rgba(255, 255, 255, 0.95);
+            --apple-text-main: #1D1D1F;
+            --apple-text-muted: #86868B;
+            --apple-border: rgba(0, 0, 0, 0.05);
+            --apple-shadow: 0 4px 24px rgba(0, 0, 0, 0.04);
+        }
+
+        body {
+            background-color: var(--apple-bg);
+            color: var(--apple-text-main);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            margin: 0;
+            -webkit-font-smoothing: antialiased;
+            overflow-x: hidden;
+        }
+
+        .glass-panel {
+            background: var(--apple-card);
+            backdrop-filter: blur(40px) saturate(200%);
+            -webkit-backdrop-filter: blur(40px) saturate(200%);
+            border: 1px solid var(--apple-border);
+            box-shadow: var(--apple-shadow);
+        }
+
+        .shimmer-text {
+            background: linear-gradient(90deg, #1D1D1F, #86868B, #1D1D1F);
+            background-size: 200% auto;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: shine 6s linear infinite;
+        }
+
+        @keyframes shine { to { background-position: 200% center; } }
+        
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.1); border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(0,0,0,0.2); }
+        
+        input[type=number]::-webkit-inner-spin-button, 
+        input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+        input[type=number] { -moz-appearance: textfield; }
+
+        .glass-input {
+            background: rgba(0,0,0,0.03); border: 1px solid transparent; color: var(--apple-text-main);
+            outline: none; transition: all 0.2s ease; font-size: 0.875rem; 
+        }
+        .glass-input:focus { border-color: var(--apple-blue); background: #fff; box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.15); }
+        .glass-input::placeholder { color: var(--apple-text-muted); }
+        
+        .price-input-table { background: transparent; border: none; border-bottom: 1px solid rgba(0,0,0,0.1); color: var(--apple-blue); text-align: right; width: 100px; font-weight: 700; outline: none; padding: 2px 4px; }
+        .price-input-table:focus { border-bottom-color: var(--apple-blue); }
+        .name-input-table { background: transparent; border: none; color: var(--apple-text-main); width: 100%; font-weight: 600; outline: none; border-bottom: 1px dashed rgba(0,0,0,0.2); transition: border 0.2s; padding: 2px 0; }
+        .name-input-table:focus { border-bottom: 1px dashed var(--apple-blue); color: var(--apple-blue); }
+
+        .price-table th { text-align: left; padding: 12px; color: var(--apple-text-muted); font-weight: 600; font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid rgba(0,0,0,0.05); }
+        .price-table td { padding: 12px; font-size: 14px; font-weight: 500; border-bottom: 1px solid rgba(0,0,0,0.02); color: var(--apple-text-main); }
+        .price-table tr:last-child td { border-bottom: none; }
+        
+        .ai-chat-bubble { max-width: 80%; padding: 12px 18px; border-radius: 20px; font-size: 14px; line-height: 1.4; font-weight: 400; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
+        .ai-bot { background: #E9E9EB; color: #000; border-bottom-left-radius: 4px; }
+        .ai-user { background: var(--apple-blue); color: #fff; align-self: flex-end; border-bottom-right-radius: 4px; }
+        .custom-scroll::-webkit-scrollbar { width: 4px; }
+        .custom-scroll::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.1); border-radius: 10px; }
+
+        /* Estilo para Finanzas (Wallet Style) */
+        .wallet-card {
+            background: linear-gradient(135deg, #ffffff 0%, #f0f0f5 100%);
+            border-radius: 28px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,1);
+            position: relative;
+            overflow: hidden;
+        }
+        .wallet-card::before {
+            content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.8) 0%, transparent 60%);
+            opacity: 0.5; pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+    <div id="root">
+        <div style="height:100vh; display:flex; align-items:center; justify-content:center; flex-direction:column; background:#F5F5F7;">
+            <div style="width:40px; height:40px; border:3px solid #007AFF; border-top-color:transparent; border-radius:50%; animation:spin 1s linear infinite;"></div>
+            <p style="color:#86868B; margin-top:20px; font-size:12px; letter-spacing:3px; font-weight:600; text-transform:uppercase;">Iniciando DriveLab OS v9.1</p>
+        </div>
+    </div>
+
+    <script type="text/babel">
+        if (typeof window.React === 'undefined') throw new Error("Motor React no cargó correctamente.");
+
+        const { useState, useEffect, useCallback, useMemo, useRef } = React;
+        const { motion, AnimatePresence } = window.FramerMotion || { motion: { div: 'div' }, AnimatePresence: ({children}) => children };
+        
+        const FallbackIcon = ({ size = 16, className = "" }) => <span className={`inline-block rounded-full bg-black/5 border border-black/10 ${className}`} style={{ width: size, height: size }}></span>;
+
+        const { 
+            Zap=FallbackIcon, Plus=FallbackIcon, Search=FallbackIcon, TrendingUp=FallbackIcon, Target=FallbackIcon, ArrowUpRight=FallbackIcon, 
+            DollarSign=FallbackIcon, X=FallbackIcon, Calculator=FallbackIcon, Save=FallbackIcon, Trash2=FallbackIcon, 
+            Archive=FallbackIcon, FileText=FallbackIcon, Settings=FallbackIcon, Wrench=FallbackIcon, Sparkles=FallbackIcon, 
+            Check=FallbackIcon, LayoutDashboard=FallbackIcon, BrainCircuit=FallbackIcon, PieChart=FallbackIcon, Send=FallbackIcon, Activity=FallbackIcon,
+            BarChart=FallbackIcon, ArrowRight=FallbackIcon, Layers=FallbackIcon, ShieldCheck=FallbackIcon, Clock=FallbackIcon, CheckCircle2=FallbackIcon, Car=FallbackIcon, MessageSquare=FallbackIcon, Info=FallbackIcon, Receipt=FallbackIcon, ChevronDown=FallbackIcon, ChevronUp=FallbackIcon, Calendar=FallbackIcon, Scale=FallbackIcon, ArrowDownCircle=FallbackIcon, ArrowUpCircle=FallbackIcon
+        } = window.lucideReact || {};
+
+        const GlassCard = ({ children, className = "", onClick, noHover = false }) => (
+            <motion.div 
+                whileHover={noHover ? {} : { scale: 1.01, boxShadow: "0 8px 30px rgba(0,0,0,0.06)" }}
+                whileTap={noHover ? {} : { scale: 0.98 }}
+                onClick={onClick}
+                className={`glass-panel rounded-[2rem] overflow-hidden relative transition-all duration-300 ${className}`}
+            >
+                {children}
+            </motion.div>
+        );
+
+        const Badge = ({ children, color = "blue", className="" }) => {
+            const colors = {
+                blue: "bg-[#007AFF]/10 text-[#007AFF]", green: "bg-[#34C759]/10 text-[#34C759]",
+                orange: "bg-[#FF9500]/10 text-[#FF9500]", red: "bg-[#FF3B30]/10 text-[#FF3B30]",
+                zinc: "bg-[#86868B]/10 text-[#86868B]", purple: "bg-[#AF52DE]/10 text-[#AF52DE]",
+                teal: "bg-teal-500/10 text-teal-600"
+            };
+            return <span className={`text-[10px] font-bold px-2.5 py-1 rounded-md uppercase tracking-wide ${colors[color]} ${className}`}>{children}</span>;
+        };
+
+        const formatCLP = (num) => {
+            if (num === null || num === undefined) return "";
+            const cleanNum = num.toString().replace(/\D/g, ''); 
+            if (!cleanNum) return "";
+            return "$" + cleanNum.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+        };
+
+        const CurrencyInput = ({ value, onChange, placeholder, className }) => {
+            const [display, setDisplay] = useState(value ? formatCLP(value) : "");
+            useEffect(() => { setDisplay(value ? formatCLP(value) : ""); }, [value]);
+            const handleChange = (e) => {
+                let raw = e.target.value.replace(/\D/g, '');
+                setDisplay(raw ? formatCLP(raw) : "");
+                onChange(raw ? Number(raw) : 0);
+            };
+            return <input type="text" value={display} onChange={handleChange} placeholder={placeholder} className={className} />;
+        };
+
+        const App = () => {
+            const [view, setView] = useState('dashboard');
+            const [inventory, setInventory] = useState([]);
+            const [history, setHistory] = useState([]);
+            const [selectedHistoryItem, setSelectedHistoryItem] = useState(null);
+            
+            const [marketPrices, setMarketPrices] = useState([{id: 1, val: ""}]);
+            const [prm, setPrm] = useState(0);
+            const [marketCar, setMarketCar] = useState({ marca: "", modelo: "", año: "", precio_compra: 0, repairs: {} });
+            const prmRef = useRef(null); 
+
+            // PARÁMETROS UNIVERSAL
+            const [reparaciones, setReparaciones] = useState({
+                gastos_legales: [
+                    { id: 'leg_1', nombre: 'Transferencia e Impuestos (%)', valor: 1.5, tipo: 'porcentaje_compra' },
+                    { id: 'leg_2', nombre: 'Trámite Notarial', valor: 25000, tipo: 'booleano' },
+                    { id: 'leg_3', nombre: 'Marketing y Publicación', valor: 15000, tipo: 'booleano' },
+                    { id: 'leg_4', nombre: 'Reserva para Imprevistos (%)', valor: 5, tipo: 'porcentaje_compra' }
+                ],
+                estetica: [
+                    { id: 'est_1', nombre: 'Pintura (Por Pieza)', valor: 80000, tipo: 'unidad' },
+                    { id: 'est_2', nombre: 'Detailing Full Premium', valor: 120000, tipo: 'booleano' },
+                    { id: 'est_3', nombre: 'Limpieza Profunda Tapiz', valor: 60000, tipo: 'booleano' },
+                    { id: 'est_4', nombre: 'Pulido y Sellado Focos', valor: 35000, tipo: 'booleano' },
+                    { id: 'est_5', nombre: 'Restauración Llantas (x4)', valor: 90000, tipo: 'booleano' },
+                    { id: 'est_6', nombre: 'Desabolladura PDR (Unidad)', valor: 45000, tipo: 'unidad' }
+                ],
+                mecanica_rapida: [
+                    { id: 'mec_1', nombre: 'Kit Aceite y Filtros (Full)', valor: 75000, tipo: 'booleano' },
+                    { id: 'mec_2', nombre: 'Neumáticos Nuevos (Par)', valor: 120000, tipo: 'unidad' },
+                    { id: 'mec_3', nombre: 'Pastillas Freno (Del/Tra)', valor: 85000, tipo: 'booleano' },
+                    { id: 'mec_4', nombre: 'Batería Nueva', valor: 75000, tipo: 'booleano' }
+                ],
+                mecanica_mayor: [
+                    { id: 'may_1', nombre: 'Kit Distribución Completo', valor: 180000, tipo: 'booleano' },
+                    { id: 'may_2', nombre: 'Kit Embrague', valor: 250000, tipo: 'booleano' },
+                    { id: 'may_3', nombre: 'Amortiguadores (Par)', valor: 140000, tipo: 'unidad' }
+                ]
+            });
+
+            const [isSavingConfig, setIsSavingConfig] = useState(false);
+            
+            // ESTADO PARA CIERRE MANUAL
+            const [saleModal, setSaleModal] = useState({ isOpen: false, vehicle: null, price: 0 });
+            const [gastosManuales, setGastosManuales] = useState([]);
+
+            const [deleteModal, setDeleteModal] = useState({ isOpen: false, id: null, title: "" });
+            const [isAdding, setIsAdding] = useState(false);
+            const [isClosing, setIsClosing] = useState(false);
+            const [closingData, setClosingData] = useState(null);
+
+            const [newVeh, setNewVeh] = useState({ 
+                marca: "", modelo: "", año: "", patente: "", precio_compra: 0, 
+                estado: "En revisión", repairs: {},
+                fecha_ingreso: new Date().toISOString().split('T')[0]
+            });
+
+            const [aiOpen, setAiOpen] = useState(false);
+            const [aiInput, setAiInput] = useState("");
+            const [aiMessages, setAiMessages] = useState([{ role: 'ai', text: 'Asistente DriveLab en línea. ¿En qué te ayudo hoy?' }]);
+            const chatEndRef = useRef(null);
+
+            // FILTROS FINANCIEROS
+            const [filterMonth, setFilterMonth] = useState(new Date().getMonth());
+            const [filterYear, setFilterYear] = useState(new Date().getFullYear());
+            const [filterMode, setFilterMode] = useState('month'); 
+            const [filterDateStart, setFilterDateStart] = useState('');
+            const [filterDateEnd, setFilterDateEnd] = useState('');
+
+            useEffect(() => {
+                if (inventory.length === 0) {
+                    setInventory([
+                        { id: 'demo-1', marca: 'Chevrolet', modelo: 'Corsa', año: 2004, patente: 'DRIVE-01', rank: 'A', estado: 'En visita', precio_compra: 1400000, 
+                          desglose_costos: { rep: 80000, leg: 46000, imp: 70000, mkt: 15000, total: 211000 }, costos_estimados: 211000, fecha_ingreso: new Date(Date.now() - 432000000).toISOString() },
+                        { id: 'demo-2', marca: 'Kia', modelo: 'Morning', año: 2012, patente: 'LABOS-22', rank: 'S', estado: 'Aceptado', precio_compra: 2800000, 
+                          desglose_costos: { rep: 120000, leg: 67000, imp: 140000, mkt: 15000, total: 342000 }, costos_estimados: 342000, fecha_ingreso: new Date(Date.now() - 1500000000).toISOString() }
+                    ]);
+                }
+                if (history.length === 0) {
+                    setHistory([
+                        { 
+                          id: 'hist-1', marca: 'Suzuki', modelo: 'Swift', año: 2015, patente: 'SWFT-55', 
+                          precio_compra: 4500000, precio_venta: 5800000, 
+                          gastos_reales: 4757500, utilidad_bruta: 1042500, reserva_imprevistos: 225000, 
+                          utilidad_neta: 654000, fondo_ops: 163500, fecha_venta: new Date().toISOString(),
+                          detalle_gastos: [
+                              { id: 1, nombre: "Compra Vehículo", monto: 4500000 },
+                              { id: 2, nombre: "Transferencia e Impuestos", monto: 67500 },
+                              { id: 3, nombre: "Trámite Notarial", monto: 25000 },
+                              { id: 4, nombre: "Detailing", monto: 120000 },
+                              { id: 5, nombre: "Batería Nueva", monto: 45000 }
+                          ]
+                        }
+                    ]);
+                }
+            }, []);
+
+            const handleReparacionChange = (categoria, id, campo, valor) => {
+                setReparaciones(prev => {
+                    const newCat = prev[categoria].map(item => item.id === id ? { ...item, [campo]: valor } : item);
+                    return { ...prev, [categoria]: newCat };
+                });
+            };
+            const addReparacion = (categoria) => {
+                const newId = categoria.substring(0,3) + '_' + Math.random().toString(36).substr(2, 5);
+                setReparaciones(prev => ({ ...prev, [categoria]: [...prev[categoria], { id: newId, nombre: 'Nuevo Parámetro', valor: 0, tipo: 'booleano' }] }));
+            };
+            const removeReparacion = (categoria, id) => setReparaciones(prev => ({ ...prev, [categoria]: prev[categoria].filter(item => item.id !== id) }));
+            const saveConfigToDB = () => { setIsSavingConfig(true); setTimeout(() => setIsSavingConfig(false), 1000); };
+
+            const addMarketSample = () => setMarketPrices([...marketPrices, { id: Date.now(), val: "" }]);
+            const removeMarketSample = (id) => setMarketPrices(marketPrices.filter(p => p.id !== id));
+            const updateMarketSample = (id, val) => setMarketPrices(marketPrices.map(p => p.id === id ? { ...p, val } : p));
+            
+            const runMarketAnalysis = () => {
+                const validPrices = marketPrices.map(p => Number(p.val)).filter(p => p > 0);
+                if (validPrices.length < 2) return;
+                validPrices.sort((a,b) => a - b);
+                const clean = validPrices.length > 2 ? validPrices.slice(1, -1) : validPrices;
+                setPrm(Math.round((clean.reduce((a,b)=>a+b,0) / clean.length) / 1000) * 1000);
+                prmRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            };
+            
+            const handleMarketRepairCheck = (id, type, val) => setMarketCar(prev => ({ ...prev, repairs: { ...prev.repairs, [id]: val } }));
+            
+            const calcularCostos = (precioCompra, repairsChecked) => {
+                let costosCat = { legales: 0, estetica: 0, mecanica: 0, imprevistos_reserva: 0 };
+                const pc = precioCompra || 0;
+
+                Object.keys(reparaciones).forEach(cat => {
+                    reparaciones[cat].forEach(item => {
+                        let monto = 0;
+                        if (item.tipo === 'porcentaje_compra') {
+                            monto = pc * (item.valor / 100);
+                        } else if (item.tipo === 'unidad') {
+                            monto = item.valor * (repairsChecked[item.id] || 0);
+                        } else {
+                            monto = repairsChecked[item.id] ? item.valor : 0;
+                        }
+
+                        if (cat === 'gastos_legales') {
+                            if (item.nombre.toLowerCase().includes('imprevistos')) costosCat.imprevistos_reserva += monto;
+                            else if (item.tipo === 'porcentaje_compra' || repairsChecked[item.id]) costosCat.legales += monto;
+                        } else if (cat === 'estetica') {
+                            costosCat.estetica += monto;
+                        } else {
+                            costosCat.mecanica += monto;
+                        }
+                    });
+                });
+
+                const totalReparaciones = costosCat.estetica + costosCat.mecanica;
+                const totalGastosEfectivos = costosCat.legales + totalReparaciones; 
+                const costoTotalProyectado = pc + totalGastosEfectivos + costosCat.imprevistos_reserva;
+
+                return { ...costosCat, totalReparaciones, totalGastosEfectivos, costoTotalProyectado };
+            };
+
+            const mktSim = calcularCostos(marketCar.precio_compra, marketCar.repairs);
+            const mktMargen = prm > 0 ? prm - mktSim.costoTotalProyectado : 0;
+            const mktRoi = mktSim.costoTotalProyectado > 0 ? ((mktMargen / mktSim.costoTotalProyectado) * 100).toFixed(1) : 0;
+
+            const handleRepairCheck = (id, type, val) => setNewVeh(prev => ({ ...prev, repairs: { ...prev.repairs, [id]: val } }));
+            
+            const handleAddVehicle = () => {
+                if(!newVeh.marca || !newVeh.precio_compra) return;
+                setIsAdding(false);
+                const calc = calcularCostos(newVeh.precio_compra, newVeh.repairs);
+                
+                let preGastos = [{ id: 'g_compra', nombre: 'Compra Vehículo', monto: Number(newVeh.precio_compra) }];
+                Object.keys(reparaciones).forEach(cat => {
+                    reparaciones[cat].forEach(item => {
+                        if (cat === 'gastos_legales' && item.nombre.toLowerCase().includes('imprevistos')) return; 
+                        
+                        let m = 0;
+                        if (item.tipo === 'porcentaje_compra') m = newVeh.precio_compra * (item.valor / 100);
+                        else if (item.tipo === 'unidad' && newVeh.repairs[item.id]) m = item.valor * newVeh.repairs[item.id];
+                        else if (newVeh.repairs[item.id]) m = item.valor;
+
+                        if (m > 0) preGastos.push({ id: 'g_' + Math.random().toString(36).substring(7), nombre: item.nombre, monto: m });
+                    });
+                });
+
+                const fechaIngresoISO = newVeh.fecha_ingreso ? new Date(newVeh.fecha_ingreso).toISOString() : new Date().toISOString();
+
+                const newObj = {
+                    id: 'veh-' + Math.random().toString(36).substr(2, 9),
+                    ...newVeh, rank: 'S', 
+                    desglose_costos: calc, 
+                    costos_estimados: calc.totalGastosEfectivos,
+                    pre_gastos: preGastos, 
+                    fecha_ingreso: fechaIngresoISO
+                };
+                setInventory([...inventory, newObj]);
+                setNewVeh({ 
+                    marca: "", modelo: "", año: "", patente: "", precio_compra: 0, 
+                    estado: "En revisión", repairs: {}, fecha_ingreso: new Date().toISOString().split('T')[0] 
+                });
+            };
+
+            const openSaleModal = (vehicle) => {
+                const list = vehicle.pre_gastos || [
+                    { id: 'g_compra', nombre: 'Compra Vehículo', monto: vehicle.precio_compra },
+                    { id: 'g_est', nombre: 'Reparaciones y Otros (Est)', monto: vehicle.costos_estimados }
+                ];
+                setGastosManuales([...list]);
+                setSaleModal({ isOpen: true, vehicle, price: "" });
+            };
+
+            const addGastoManual = () => setGastosManuales([...gastosManuales, { id: Date.now().toString(), nombre: '', monto: 0 }]);
+            const updateGastoManual = (id, campo, valor) => setGastosManuales(gastosManuales.map(g => g.id === id ? { ...g, [campo]: valor } : g));
+            const removeGastoManual = (id) => setGastosManuales(gastosManuales.filter(g => g.id !== id));
+
+            const handleLiquidationSubmit = () => {
+                const v = saleModal.vehicle;
+                const pVenta = saleModal.price;
+                
+                const gastosRealesTotales = gastosManuales.reduce((acc, g) => acc + Number(g.monto), 0);
+                const utilidadBruta = pVenta - gastosRealesTotales;
+                
+                let pctImprevistos = 5;
+                const paramImp = reparaciones.gastos_legales.find(i => i.nombre.toLowerCase().includes('imprevistos'));
+                if(paramImp) pctImprevistos = paramImp.valor;
+                
+                const reservaImprevistos = (v.precio_compra * (pctImprevistos / 100));
+                const utilidadPostImprevistos = utilidadBruta - reservaImprevistos;
+
+                let fondoLibre20 = 0;
+                let utilidadNeta = 0;
+                
+                if (utilidadPostImprevistos > 0) {
+                    fondoLibre20 = utilidadPostImprevistos * 0.20; 
+                    utilidadNeta = utilidadPostImprevistos * 0.80; 
+                }
+
+                const soldVehicle = { 
+                    ...v, 
+                    precio_venta: pVenta, 
+                    gastos_reales: gastosRealesTotales,
+                    detalle_gastos: gastosManuales, 
+                    utilidad_bruta: utilidadBruta,
+                    reserva_imprevistos: reservaImprevistos,
+                    fondo_ops: fondoLibre20, 
+                    utilidad_neta: utilidadNeta, 
+                    fecha_venta: new Date().toISOString() 
+                };
+                
+                setHistory(prev => [soldVehicle, ...prev]);
+                setInventory(prev => prev.filter(item => item.id !== v.id));
+
+                setClosingData({ utilidad_neta: utilidadNeta, fondo_ops: fondoLibre20, bruto: utilidadBruta });
+                setSaleModal({ isOpen: false, vehicle: null, price: 0 });
+                setIsClosing(true);
+                setTimeout(() => setIsClosing(false), 5000);
+            };
+
+            const scrollToBottom = () => chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
+            useEffect(() => { if(aiOpen) scrollToBottom(); }, [aiMessages, aiOpen]);
+            const handleAiSubmit = (e) => {
+                e.preventDefault();
+                if(!aiInput.trim()) return;
+                const newMsgs = [...aiMessages, { role: 'user', text: aiInput }];
+                setAiMessages(newMsgs);
+                setAiInput("");
+                setTimeout(() => setAiMessages([...newMsgs, { role: 'ai', text: "Entendido. La estrategia se actualizó correctamente." }]), 800);
+            };
+
+            const calcDays = (d) => Math.ceil(Math.abs(new Date() - new Date(d)) / (1000 * 60 * 60 * 24)) || 0;
+            const formatDate = (d) => { const x = new Date(d); return `${x.getDate()}/${x.getMonth()+1}/${x.getFullYear()}`; };
+
+            // CALCULADORA FINANCIERA CON FILTROS REPARADOS
+            const filteredHistory = history.filter(h => {
+                if (filterMode === 'all') return true;
+                if (!h.fecha_venta) return false; 
+                
+                const d = new Date(h.fecha_venta);
+                if (isNaN(d.getTime())) return false; // Guard vital contra crashes
+                
+                if (filterMode === 'month') {
+                    return d.getMonth() === filterMonth && d.getFullYear() === filterYear;
+                }
+                if (filterMode === 'range') {
+                    const dateSale = d.toISOString().split('T')[0];
+                    const isAfterStart = filterDateStart ? dateSale >= filterDateStart : true;
+                    const isBeforeEnd = filterDateEnd ? dateSale <= filterDateEnd : true;
+                    return isAfterStart && isBeforeEnd;
+                }
+                return true;
+            });
+
+            const mesVentasTotales = filteredHistory.reduce((acc, h) => acc + h.precio_venta, 0);
+            const mesGastosPagados = filteredHistory.reduce((acc, h) => acc + (h.gastos_reales || 0), 0);
+            const mesUtilidadBruta = filteredHistory.reduce((acc, h) => acc + (h.utilidad_bruta || 0), 0);
+            const mesReservaImprevistos = filteredHistory.reduce((acc, h) => acc + (h.reserva_imprevistos || 0), 0);
+            const mesFondoLibre = filteredHistory.reduce((acc, h) => acc + (h.fondo_ops || 0), 0);
+            const mesUtilidadGanada = filteredHistory.reduce((acc, h) => acc + (h.utilidad_neta || 0), 0);
+            
+            const mesesNombres = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+            let tituloFinanzas = "Resumen Histórico Total";
+            if (filterMode === 'month') tituloFinanzas = `Resumen de ${mesesNombres[filterMonth]} ${filterYear}`;
+            if (filterMode === 'range') tituloFinanzas = `Periodo Seleccionado`;
+
+            const vehiculosAceptados = inventory.filter(v => v.estado === 'Aceptado');
+            const capitalDesplegado = vehiculosAceptados.reduce((a,b) => a + (b.precio_compra + b.costos_estimados), 0);
+
+            return (
+                <div className="min-h-screen px-4 md:px-8 max-w-[1400px] mx-auto pb-20 relative">
+                    
+                    {/* NAV: MENU MAC OS */}
+                    <header className="fixed top-6 left-0 right-0 z-[40] flex justify-center px-4 pointer-events-none">
+                        <nav className="glass-panel p-1.5 rounded-full flex items-center gap-1 pointer-events-auto bg-white/70 backdrop-blur-2xl shadow-lg border border-white/50">
+                            <button onClick={() => setView('dashboard')} className={`px-5 py-2.5 rounded-full text-xs font-semibold transition-all flex items-center gap-2 ${view === 'dashboard' ? 'bg-[#1D1D1F] text-white shadow-md' : 'text-[#86868B] hover:text-[#1D1D1F]'}`}><LayoutDashboard size={16}/> Dashboard</button>
+                            <button onClick={() => setView('market')} className={`px-5 py-2.5 rounded-full text-xs font-semibold transition-all flex items-center gap-2 ${view === 'market' ? 'bg-[#1D1D1F] text-white shadow-md' : 'text-[#86868B] hover:text-[#1D1D1F]'}`}><Target size={16}/> Simulador</button>
+                            <button onClick={() => setView('stats')} className={`px-5 py-2.5 rounded-full text-xs font-semibold transition-all flex items-center gap-2 ${view === 'stats' ? 'bg-[#1D1D1F] text-white shadow-md' : 'text-[#86868B] hover:text-[#1D1D1F]'}`}><BarChart size={16}/> Finanzas</button>
+                            <div className="w-px h-5 bg-black/10 mx-1" />
+                            <button onClick={() => setView('history')} className={`px-4 py-2.5 rounded-full text-xs font-semibold transition-all flex items-center gap-2 ${view === 'history' ? 'bg-[#1D1D1F] text-white shadow-md' : 'text-[#86868B] hover:text-[#1D1D1F]'}`}><Archive size={16}/> Historial</button>
+                            <button onClick={() => setView('tables')} className={`px-4 py-2.5 rounded-full text-xs font-semibold transition-all flex items-center gap-2 ${view === 'tables' ? 'bg-[#1D1D1F] text-white shadow-md' : 'text-[#86868B] hover:text-[#1D1D1F]'}`}><Settings size={16}/> Parámetros</button>
+                        </nav>
+                    </header>
+
+                    <main className="pt-32">
+                        {/* HEADER GENERAL */}
+                        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="mb-10 flex flex-col md:flex-row justify-between items-end">
+                            <div>
+                                <h1 className="text-5xl font-black tracking-tight shimmer-text mb-2">DriveLab <span className="text-[#007AFF]">OS</span></h1>
+                                <div className="flex items-center gap-3">
+                                    <span className="text-[#86868B] font-semibold text-[10px] tracking-widest uppercase flex items-center gap-1.5"><ShieldCheck size={12}/> Sesión Activa</span>
+                                </div>
+                            </div>
+                        </motion.div>
+
+                        {/* --- VISTA DASHBOARD (REDISEÑADA) --- */}
+                        {view === 'dashboard' && (
+                            <div className="space-y-8 animate-in fade-in duration-500">
+                                
+                                {/* KPI GRID */}
+                                <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                                    <GlassCard className="p-8 md:col-span-2 bg-gradient-to-br from-[#007AFF]/10 to-white" noHover>
+                                        <p className="text-[#007AFF] text-xs font-bold uppercase tracking-widest mb-2 flex items-center gap-2"><Scale size={16}/> Capital Desplegado (Aceptados)</p>
+                                        <h2 className="text-6xl font-black tracking-tight text-[#1D1D1F]">{formatCLP(capitalDesplegado)}</h2>
+                                    </GlassCard>
+                                    <GlassCard className="p-8 bg-white flex flex-col justify-center items-center text-center shadow-sm" noHover>
+                                        <div className="w-12 h-12 rounded-full bg-[#F5F5F7] text-[#1D1D1F] flex items-center justify-center mb-3"><Car size={24}/></div>
+                                        <h3 className="text-4xl font-black text-[#1D1D1F]">{vehiculosAceptados.length} <span className="text-lg text-[#86868B] font-medium">/ {inventory.length}</span></h3>
+                                        <p className="text-[#86868B] text-[10px] font-bold uppercase tracking-widest mt-1">Unidades Aceptadas / Total</p>
+                                    </GlassCard>
+                                    
+                                    {/* NUEVO DISEÑO AGREGAR VEHÍCULO */}
+                                    <GlassCard onClick={() => setIsAdding(true)} className="p-8 bg-[#1D1D1F] flex flex-col justify-center items-center text-center cursor-pointer hover:bg-[#000] transition-all shadow-xl hover:-translate-y-1 group" noHover>
+                                        <div className="w-14 h-14 rounded-full bg-[#007AFF] text-white shadow-[0_0_20px_rgba(0,122,255,0.4)] flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
+                                            <Plus size={28}/>
+                                        </div>
+                                        <p className="text-white text-xs font-bold uppercase tracking-widest">Agregar Vehículo</p>
+                                    </GlassCard>
+                                </div>
+
+                                {/* ACTIVE FLEET GRID CON ESTADOS Y CUENTA REGRESIVA */}
+                                <div>
+                                    <h3 className="text-xl font-bold tracking-tight mb-6 mt-4 text-[#1D1D1F]">Portafolio Activo</h3>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                        {inventory.map((v) => {
+                                            const diasEnPista = calcDays(v.fecha_ingreso);
+                                            const diasRestantes = 20 - diasEnPista;
+                                            const esAtrasado = diasRestantes < 0;
+                                            const colorDias = diasRestantes > 5 ? 'green' : (diasRestantes >= 0 ? 'orange' : 'red');
+
+                                            return (
+                                            <GlassCard key={v.id} className="group bg-white p-6 border border-black/5 shadow-sm">
+                                                <button onClick={(e) => { e.stopPropagation(); setDeleteModal({ isOpen: true, id: v.id, title: `${v.marca} ${v.modelo}` }); }} className="absolute top-6 right-6 z-20 w-8 h-8 rounded-full bg-[#F5F5F7] flex items-center justify-center text-[#86868B] hover:bg-[#FF3B30]/10 hover:text-[#FF3B30] transition-all opacity-0 group-hover:opacity-100"><Trash2 size={14} /></button>
+                                                
+                                                <div className="flex gap-2 mb-6">
+                                                    <Badge color={v.estado === 'Aceptado' ? 'green' : (v.estado === 'En visita' ? 'orange' : 'blue')}>{v.estado}</Badge>
+                                                    <Badge color={colorDias} className="flex items-center gap-1">
+                                                        <Clock size={10}/> 
+                                                        {esAtrasado ? `Atraso: ${Math.abs(diasRestantes)}d` : `Quedan: ${diasRestantes}d`}
+                                                    </Badge>
+                                                </div>
+                                                
+                                                <div className="mb-6">
+                                                    <p className="text-[#86868B] text-[10px] font-bold mb-1 tracking-widest uppercase">{v.patente} • {v.año}</p>
+                                                    <h3 className="text-2xl font-black leading-tight text-[#1D1D1F]">{v.marca}</h3>
+                                                    <h4 className="text-xl font-medium text-[#86868B]">{v.modelo}</h4>
+                                                </div>
+                                                
+                                                <div className="bg-[#F5F5F7] rounded-xl p-4 mb-6 space-y-2">
+                                                    <div className="flex justify-between text-xs"><span className="text-[#86868B] font-medium">Compra</span><span className="font-semibold text-[#1D1D1F]">{formatCLP(v.precio_compra)}</span></div>
+                                                    <div className="flex justify-between text-xs"><span className="text-[#86868B] font-medium">Gastos Est.</span><span className="font-semibold text-[#FF9500]">{formatCLP(v.costos_estimados)}</span></div>
+                                                    <div className="h-px bg-black/5 my-1"></div>
+                                                    <div className="flex justify-between text-sm items-center"><span className="text-[#1D1D1F] font-bold text-[10px] uppercase">Inversión Total</span><span className="font-black text-[#1D1D1F]">{formatCLP(Number(v.precio_compra) + Number(v.costos_estimados))}</span></div>
+                                                </div>
+                                                <button onClick={() => openSaleModal(v)} className="w-full py-3.5 bg-[#1D1D1F] font-bold text-xs uppercase tracking-wider rounded-xl hover:bg-[#000] text-white transition-colors flex items-center justify-center gap-2">Cerrar Operación <ArrowUpRight size={16} /></button>
+                                            </GlassCard>
+                                        )})}
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* --- VISTA SIMULADOR DE MERCADO --- */}
+                        {view === 'market' && (
+                            <div className="max-w-7xl mx-auto animate-in fade-in duration-500" ref={prmRef}>
+                                <div className="mb-10">
+                                    <h2 className="text-4xl font-black tracking-tight mb-2 flex items-center gap-3 text-[#1D1D1F]"><Target size={32} className="text-[#007AFF]"/> Simulador Estratégico</h2>
+                                    <p className="text-[#86868B] font-medium">Enfrenta el Precio de Mercado contra el costo real de tu futura adquisición.</p>
+                                </div>
+                                
+                                <GlassCard className="p-8 mb-8 rounded-[2rem] bg-white border border-black/5 shadow-md" noHover>
+                                    <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+                                        <div className="border-r border-black/5 pr-8">
+                                            <p className="text-[10px] font-bold uppercase text-[#007AFF] tracking-widest mb-1">Precio Sugerido Venta</p>
+                                            <h3 className="text-3xl font-black text-[#1D1D1F]">{formatCLP(prm)}</h3>
+                                        </div>
+                                        <div className="border-r border-black/5 pr-8">
+                                            <p className="text-[10px] font-bold uppercase text-[#86868B] tracking-widest mb-1">Costo Total Vehículo</p>
+                                            <h3 className="text-3xl font-black text-[#1D1D1F]">{formatCLP(mktSim.costoTotalProyectado)}</h3>
+                                        </div>
+                                        <div className="border-r border-black/5 pr-8">
+                                            <p className="text-[10px] font-bold uppercase tracking-widest mb-1 text-[#86868B]">Margen Bruto Utilidad</p>
+                                            <h3 className={`text-3xl font-black ${mktMargen >= 500000 ? 'text-[#34C759]' : (mktMargen >= 0 ? 'text-[#FF9500]' : 'text-[#FF3B30]')}`}>
+                                                {formatCLP(mktMargen)}
+                                            </h3>
+                                        </div>
+                                        <div>
+                                            <p className="text-[10px] font-bold uppercase text-[#86868B] tracking-widest mb-1">ROI Proyectado</p>
+                                            <h3 className={`text-3xl font-black ${mktRoi >= 20 ? 'text-[#34C759]' : 'text-[#FF9500]'}`}>{mktRoi}%</h3>
+                                        </div>
+                                    </div>
+                                    
+                                    <div className="mt-8 pt-6 border-t border-black/5">
+                                        <p className="text-xs font-bold text-[#1D1D1F] uppercase tracking-widest mb-3 flex items-center gap-2"><PieChart size={14}/> Desglose Analítico del Costo Evaluado</p>
+                                        <div className="flex flex-wrap gap-4 text-xs font-medium text-[#86868B]">
+                                            <div className="bg-[#F5F5F7] px-4 py-2 rounded-lg">Compra: <span className="font-bold text-[#1D1D1F]">{formatCLP(marketCar.precio_compra)}</span></div>
+                                            <div className="bg-[#F5F5F7] px-4 py-2 rounded-lg">G. Legales/Impuestos: <span className="font-bold text-[#1D1D1F]">{formatCLP(mktSim.legales)}</span></div>
+                                            <div className="bg-[#F5F5F7] px-4 py-2 rounded-lg">Reparaciones (Est+Mec): <span className="font-bold text-[#1D1D1F]">{formatCLP(mktSim.totalReparaciones)}</span></div>
+                                            <div className="bg-[#F5F5F7] px-4 py-2 rounded-lg">Reserva Imprevistos: <span className="font-bold text-[#FF9500]">{formatCLP(mktSim.imprevistos_reserva)}</span></div>
+                                        </div>
+                                    </div>
+                                </GlassCard>
+
+                                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                                    {/* 1. SIMULADOR DE COMPRA */}
+                                    <div className="space-y-6">
+                                        <h3 className="text-lg font-bold tracking-tight mb-4 flex items-center gap-2 text-[#1D1D1F]"><Car size={18}/> 1. Simulador de Compra</h3>
+                                        <GlassCard className="p-6 bg-white flex flex-col min-h-[600px] h-full border border-black/5 shadow-sm">
+                                            <div className="flex gap-3 mb-4">
+                                                <input className="w-2/5 glass-input p-3 rounded-xl font-medium" placeholder="Marca (Ej: KIA)" value={marketCar.marca} onChange={e=>setMarketCar({...marketCar, marca: e.target.value})} />
+                                                <input className="w-2/5 glass-input p-3 rounded-xl font-medium" placeholder="Modelo" value={marketCar.modelo} onChange={e=>setMarketCar({...marketCar, modelo: e.target.value})} />
+                                                <input className="w-1/5 glass-input p-3 rounded-xl font-medium text-center" placeholder="Año" type="number" value={marketCar.año} onChange={e=>setMarketCar({...marketCar, año: e.target.value})} />
+                                            </div>
+                                            <div className="mb-5">
+                                                <label className="text-[10px] font-bold text-[#86868B] uppercase tracking-widest block mb-1 pl-1">Oferta Negociada</label>
+                                                <CurrencyInput className="w-full glass-input p-4 rounded-xl font-black text-2xl border-[#007AFF]/20 bg-[#007AFF]/5 text-[#1D1D1F]" placeholder="$ Ingresa el precio" value={marketCar.precio_compra} onChange={val => setMarketCar({...marketCar, precio_compra: val})} />
+                                            </div>
+                                            <label className="text-[10px] font-bold text-[#86868B] uppercase tracking-widest block mb-1 pl-1">Evaluación Clínica de Descuentos</label>
+                                            <div className="flex-grow bg-[#F5F5F7] rounded-xl p-2 border border-black/5">
+                                                {Object.keys(reparaciones).map(cat => (
+                                                    <div key={cat} className="mb-3">
+                                                        <div className="px-2 py-1"><span className="text-[9px] font-bold text-[#86868B] uppercase tracking-widest">{cat.replace('_', ' ')}</span></div>
+                                                        <div className="p-1 space-y-1.5">
+                                                            {reparaciones[cat].map(item => (
+                                                                <div key={item.id} className="flex justify-between items-center bg-white p-2.5 rounded-lg border border-black/5 shadow-sm">
+                                                                    <span className="text-xs font-medium text-[#1D1D1F]">{item.nombre}</span>
+                                                                    {item.tipo === 'unidad' ? (
+                                                                        <input type="number" className="w-16 glass-input p-1 rounded-md text-center text-xs font-bold bg-[#F5F5F7]" value={marketCar.repairs[item.id] || ""} placeholder="0" onChange={e => handleMarketRepairCheck(item.id, 'unidad', Number(e.target.value))} />
+                                                                    ) : (
+                                                                        <input type="checkbox" className="w-5 h-5 rounded-md accent-[#007AFF]" checked={!!marketCar.repairs[item.id]} onChange={e => handleMarketRepairCheck(item.id, 'booleano', e.target.checked)} />
+                                                                    )}
+                                                                </div>
+                                                            ))}
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </GlassCard>
+                                    </div>
+
+                                    {/* 2. MUESTRAS DE MERCADO */}
+                                    <div className="space-y-6">
+                                        <h3 className="text-lg font-bold tracking-tight mb-4 flex items-center gap-2 text-[#1D1D1F]"><Activity size={18}/> 2. Estudios de Mercado</h3>
+                                        <GlassCard className="p-6 bg-white border border-black/5 min-h-[600px] h-full flex flex-col shadow-sm">
+                                            <p className="text-xs text-[#86868B] mb-4 font-medium">Busca vehículos similares en portales y anota sus precios aquí para obtener el promedio real.</p>
+                                            <div className="space-y-3 mb-6 flex-grow">
+                                                {marketPrices.map((p, idx) => (
+                                                    <div key={p.id} className="flex items-center gap-2">
+                                                        <div className="flex-1 p-2 pl-4 rounded-xl flex items-center bg-[#F5F5F7]">
+                                                            <span className="text-[#86868B] font-bold text-[10px] w-16 tracking-widest uppercase">Target {idx+1}</span>
+                                                            <CurrencyInput value={p.val} onChange={(val) => updateMarketSample(p.id, val)} placeholder="$ Valor publicado" className="bg-transparent border-none outline-none flex-1 text-lg font-bold py-1 text-[#1D1D1F]" />
+                                                        </div>
+                                                        <button onClick={() => removeMarketSample(p.id)} className="w-10 h-10 rounded-xl bg-[#FF3B30]/10 text-[#FF3B30] flex items-center justify-center hover:bg-[#FF3B30] hover:text-white transition-all"><X size={16}/></button>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                            <div className="pt-4 border-t border-black/5 mt-auto">
+                                                <button onClick={addMarketSample} className="w-full py-3 mb-3 bg-[#F5F5F7] rounded-xl font-semibold text-sm text-[#1D1D1F] hover:bg-[#E9E9EB] transition-colors flex items-center justify-center gap-2"><Plus size={16}/> Añadir Target</button>
+                                                <button onClick={runMarketAnalysis} className="w-full py-5 bg-[#1D1D1F] rounded-2xl font-black text-sm uppercase tracking-widest text-white hover:bg-[#000] transition-colors shadow-lg flex justify-center items-center gap-2"><Target size={18}/> Calcular Resultado</button>
+                                            </div>
+                                        </GlassCard>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* --- VISTA FINANZAS: DISEÑO APPLE WALLET --- */}
+                        {view === 'stats' && (
+                            <div className="max-w-5xl mx-auto animate-in fade-in duration-500 space-y-8">
+                                <div className="mb-10 flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
+                                    <div>
+                                        <h2 className="text-4xl font-black tracking-tight mb-2 text-[#1D1D1F]">Finanzas y Rendimiento</h2>
+                                        <p className="text-[#86868B] uppercase tracking-widest text-xs font-bold">{tituloFinanzas}</p>
+                                    </div>
+
+                                    {/* FILTRO DE FECHAS ESTILO APPLE */}
+                                    <div className="glass-panel bg-white p-2 rounded-2xl shadow-sm border border-black/5 flex flex-col xl:flex-row items-center gap-2 w-full md:w-auto">
+                                        <div className="flex bg-[#F5F5F7] rounded-xl p-1 w-full xl:w-auto">
+                                            <button onClick={() => setFilterMode('month')} className={`flex-1 xl:flex-none px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${filterMode === 'month' ? 'bg-white text-[#1D1D1F] shadow-sm' : 'text-[#86868B] hover:text-[#1D1D1F]'}`}>Mes</button>
+                                            <button onClick={() => setFilterMode('range')} className={`flex-1 xl:flex-none px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${filterMode === 'range' ? 'bg-white text-[#1D1D1F] shadow-sm' : 'text-[#86868B] hover:text-[#1D1D1F]'}`}>Rango</button>
+                                            <button onClick={() => setFilterMode('all')} className={`flex-1 xl:flex-none px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${filterMode === 'all' ? 'bg-white text-[#1D1D1F] shadow-sm' : 'text-[#86868B] hover:text-[#1D1D1F]'}`}>Todo</button>
+                                        </div>
+                                        
+                                        {filterMode === 'month' && (
+                                            <div className="flex gap-2 w-full xl:w-auto">
+                                                <select value={filterMonth} onChange={(e) => setFilterMonth(Number(e.target.value))} className="glass-input bg-[#F5F5F7] border-none text-xs font-bold px-3 py-1.5 rounded-xl text-[#1D1D1F] outline-none cursor-pointer flex-1 xl:flex-none">
+                                                    {mesesNombres.map((mes, idx) => <option key={mes} value={idx}>{mes}</option>)}
+                                                </select>
+                                                <select value={filterYear} onChange={(e) => setFilterYear(Number(e.target.value))} className="glass-input bg-[#F5F5F7] border-none text-xs font-bold px-3 py-1.5 rounded-xl text-[#1D1D1F] outline-none cursor-pointer flex-1 xl:flex-none xl:w-24">
+                                                    {[2024, 2025, 2026, 2027, 2028, 2029, 2030].map(year => <option key={year} value={year}>{year}</option>)}
+                                                </select>
+                                            </div>
+                                        )}
+
+                                        {filterMode === 'range' && (
+                                            <div className="flex gap-2 w-full xl:w-auto items-center bg-[#F5F5F7] rounded-xl p-1 px-2">
+                                                <input type="date" value={filterDateStart} onChange={e => setFilterDateStart(e.target.value)} className="bg-transparent border-none text-[11px] font-bold text-[#1D1D1F] outline-none flex-1" />
+                                                <span className="text-[10px] font-black text-[#86868B]">-</span>
+                                                <input type="date" value={filterDateEnd} onChange={e => setFilterDateEnd(e.target.value)} className="bg-transparent border-none text-[11px] font-bold text-[#1D1D1F] outline-none flex-1" />
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                                
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                    
+                                    {/* WALLET CARD - INGRESOS */}
+                                    <div className="wallet-card p-8">
+                                        <div className="flex justify-between items-center mb-10">
+                                            <div className="w-12 h-12 rounded-full bg-[#34C759]/10 text-[#34C759] flex justify-center items-center"><ArrowUpCircle size={28}/></div>
+                                            <span className="text-[10px] font-black uppercase tracking-widest text-[#86868B]">Ingresos Brutos</span>
+                                        </div>
+                                        <h3 className="text-5xl font-black text-[#1D1D1F] mb-2">+{formatCLP(mesVentasTotales)}</h3>
+                                        <p className="text-sm font-semibold text-[#86868B]">Total ventas del mes</p>
+                                    </div>
+
+                                    {/* WALLET CARD - GASTOS */}
+                                    <div className="wallet-card p-8 bg-gradient-to-br from-[#FFF5F5] to-[#FFEBEB]">
+                                        <div className="flex justify-between items-center mb-10">
+                                            <div className="w-12 h-12 rounded-full bg-[#FF3B30]/10 text-[#FF3B30] flex justify-center items-center"><ArrowDownCircle size={28}/></div>
+                                            <span className="text-[10px] font-black uppercase tracking-widest text-[#86868B]">Gastos Pagados</span>
+                                        </div>
+                                        <h3 className="text-5xl font-black text-[#FF3B30] mb-2">-{formatCLP(mesGastosPagados)}</h3>
+                                        <p className="text-sm font-semibold text-[#86868B]">Costo base, reparaciones y legales</p>
+                                    </div>
+
+                                    {/* WALLET CARD - UTILIDAD BRUTA (SOLO 1 VEZ AHORA) */}
+                                    <div className="wallet-card p-8 md:col-span-2 bg-gradient-to-r from-[#1D1D1F] to-[#2C2C2E] text-white">
+                                        <div className="flex justify-between items-end">
+                                            <div>
+                                                <p className="text-xs font-bold uppercase tracking-widest text-white/50 mb-2">Margen Total (Utilidad Bruta)</p>
+                                                <h3 className="text-6xl font-black">{formatCLP(mesUtilidadBruta)}</h3>
+                                            </div>
+                                            <div className="text-right">
+                                                <p className="text-xs font-bold uppercase tracking-widest text-white/50 mb-1">Operaciones</p>
+                                                <p className="text-2xl font-bold">{filteredHistory.length}</p>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* DISTRIBUCIÓN */}
+                                    <div className="md:col-span-2 mt-4">
+                                        <h4 className="text-xs font-black text-[#86868B] uppercase tracking-widest mb-4 flex items-center gap-2"><PieChart size={14}/> Distribución de Fondos</h4>
+                                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                            <GlassCard className="p-6 bg-white border-t-4 border-t-[#FF9500] text-center shadow-sm" noHover>
+                                                <p className="text-[10px] font-bold uppercase tracking-widest text-[#86868B] mb-1">Reserva Imprevistos</p>
+                                                <h3 className="text-2xl font-black text-[#FF9500]">{formatCLP(mesReservaImprevistos)}</h3>
+                                            </GlassCard>
+                                            <GlassCard className="p-6 bg-white border-t-4 border-t-[#007AFF] text-center shadow-sm" noHover>
+                                                <p className="text-[10px] font-bold uppercase tracking-widest text-[#86868B] mb-1">Fondo Ops (Empresa)</p>
+                                                <h3 className="text-2xl font-black text-[#007AFF]">{formatCLP(mesFondoLibre)}</h3>
+                                            </GlassCard>
+                                            <GlassCard className="p-6 bg-[#34C759] text-white text-center transform scale-105 border-none shadow-xl" noHover>
+                                                <p className="text-[10px] font-bold uppercase tracking-widest text-white/80 mb-1">Ganancia Neta (Bolsillo)</p>
+                                                <h3 className="text-3xl font-black text-white">{formatCLP(mesUtilidadGanada)}</h3>
+                                            </GlassCard>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+                        )}
+
+                        {/* --- VISTA TABLAS DE PRECIOS EDITABLES --- */}
+                        {view === 'tables' && (
+                            <div className="max-w-7xl mx-auto animate-in fade-in duration-500">
+                                <div className="flex justify-between items-end mb-10">
+                                    <div>
+                                        <h2 className="text-4xl font-black tracking-tight mb-2 text-[#1D1D1F]">Parámetros del Sistema</h2>
+                                        <p className="text-[#86868B] text-sm font-medium">Gestiona costos y porcentajes. Modifica los nombres clickeando sobre ellos.</p>
+                                    </div>
+                                    <button onClick={saveConfigToDB} className={`px-6 py-3 rounded-xl font-bold text-sm transition-all flex items-center gap-2 ${isSavingConfig ? 'bg-[#34C759] text-white' : 'bg-[#1D1D1F] text-white hover:bg-[#000]'}`}>
+                                        {isSavingConfig ? <><Check size={18}/> Guardado</> : <><Save size={18}/> Guardar Cambios</>}
+                                    </button>
+                                </div>
+                                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                                    {Object.keys(reparaciones).map(cat => (
+                                        <GlassCard key={cat} className="p-0 overflow-hidden bg-white border border-black/5 shadow-sm" noHover>
+                                            <div className="p-5 border-b border-black/5 bg-[#F5F5F7] flex justify-between items-center">
+                                                <h3 className="text-xs font-black text-[#1D1D1F] uppercase tracking-[0.15em] flex items-center gap-2">
+                                                    {cat === 'gastos_legales' ? <ShieldCheck size={14} className="text-[#34C759]"/> : cat === 'estetica' ? <Sparkles size={14} className="text-[#AF52DE]"/> : cat === 'mecanica_rapida' ? <Wrench size={14} className="text-[#007AFF]"/> : <Target size={14} className="text-[#FF9500]"/>}
+                                                    {cat.replace('_', ' ')}
+                                                </h3>
+                                                <button onClick={() => addReparacion(cat)} className="text-[10px] uppercase font-bold bg-white text-[#1D1D1F] border border-black/5 px-3 py-1.5 rounded-lg flex items-center gap-1 shadow-sm hover:bg-gray-50"><Plus size={12}/> Fila</button>
+                                            </div>
+                                            <div className="max-h-[400px] overflow-y-auto custom-scroll">
+                                                <table className="w-full price-table">
+                                                    <tbody>
+                                                        {reparaciones[cat].map(item => (
+                                                            <tr key={item.id} className="group hover:bg-[#F5F5F7]/80 transition-colors">
+                                                                <td className="w-full py-3 pl-6"><input type="text" className="name-input-table" value={item.nombre} onChange={(e) => handleReparacionChange(cat, item.id, 'nombre', e.target.value)} /></td>
+                                                                <td className="py-3">
+                                                                    <div className="flex items-center gap-1">
+                                                                        {item.tipo === 'porcentaje_compra' && <span className="text-[10px] text-[#86868B] font-bold">%</span>}
+                                                                        {item.tipo !== 'porcentaje_compra' && <span className="text-[10px] text-[#86868B] font-bold">$</span>}
+                                                                        <input 
+                                                                            type={item.tipo === 'porcentaje_compra' ? "number" : "text"} 
+                                                                            className="price-input-table text-sm" 
+                                                                            value={item.tipo === 'porcentaje_compra' ? item.valor : formatCLP(item.valor)} 
+                                                                            onChange={(e) => {
+                                                                                let val = item.tipo === 'porcentaje_compra' ? Number(e.target.value) : Number(e.target.value.replace(/\D/g, ''));
+                                                                                handleReparacionChange(cat, item.id, 'valor', val);
+                                                                            }} 
+                                                                        />
+                                                                    </div>
+                                                                </td>
+                                                                <td className="w-12 text-center py-3 pr-4"><button onClick={() => removeReparacion(cat, item.id)} className="text-[#86868B] hover:text-[#FF3B30] opacity-0 group-hover:opacity-100 transition-opacity bg-[#FF3B30]/10 p-1.5 rounded-md"><Trash2 size={14}/></button></td>
+                                                            </tr>
+                                                        ))}
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </GlassCard>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* --- VISTA REGISTRO DE CIERRES --- */}
+                        {view === 'history' && (
+                            <div className="max-w-6xl mx-auto animate-in fade-in duration-500">
+                                <div className="mb-10">
+                                    <h2 className="text-4xl font-black tracking-tight mb-2 text-[#1D1D1F]">Registro de Cierres</h2>
+                                    <p className="text-[#86868B] text-sm font-medium">Haz clic en una fila para ver el comprobante y los gastos detallados.</p>
+                                </div>
+                                <div className="glass-panel rounded-[2rem] overflow-hidden bg-white border border-black/5 shadow-sm">
+                                    <table className="w-full text-left price-table">
+                                        <thead className="bg-[#F5F5F7]">
+                                            <tr><th className="py-4 pl-8">Activo Liquidado</th><th className="py-4">Fecha Cierre</th><th className="py-4 text-right">Venta</th><th className="py-4 text-right text-[#007AFF]">Fondo Libre</th><th className="py-4 pr-8 text-right text-[#34C759]">Ganancia Neta</th></tr>
+                                        </thead>
+                                        <tbody>
+                                            {history.map((h) => (
+                                                <tr key={h.id} onClick={() => setSelectedHistoryItem(h)} className="hover:bg-[#F5F5F7] cursor-pointer transition-colors">
+                                                    <td className="py-4 pl-8"><div className="font-bold text-[#1D1D1F]">{h.marca} {h.modelo}</div><div className="text-[10px] text-[#86868B] uppercase font-bold">{h.patente}</div></td>
+                                                    <td className="py-4 text-[#86868B] text-xs font-medium">{formatDate(h.fecha_venta)}</td>
+                                                    <td className="py-4 text-[#1D1D1F] font-black text-right">{formatCLP(h.precio_venta)}</td>
+                                                    <td className="py-4 text-[#007AFF] font-black text-right">{formatCLP(h.fondo_ops)}</td>
+                                                    <td className="py-4 pr-8 text-[#34C759] font-black text-right">{formatCLP(h.utilidad_neta)}</td>
+                                                </tr>
+                                            ))}
+                                            {history.length === 0 && <tr><td colSpan="5" className="text-center py-10 font-bold text-[#86868B]">No hay registros aún.</td></tr>}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        )}
+                    </main>
+
+                    {/* --- MODAL DETALLE DE HISTORIAL (VOUCHER) --- */}
+                    <AnimatePresence>
+                        {selectedHistoryItem && (
+                            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[110] bg-black/40 backdrop-blur-sm flex items-center justify-center p-4">
+                                <motion.div initial={{ scale: 0.95, y: 10 }} animate={{ scale: 1, y: 0 }} className="glass-panel w-full max-w-lg p-8 rounded-[2.5rem] bg-white relative shadow-2xl">
+                                    <button onClick={() => setSelectedHistoryItem(null)} className="absolute top-6 right-6 w-8 h-8 rounded-full bg-[#F5F5F7] flex items-center justify-center text-[#86868B] hover:bg-[#E9E9EB] transition-colors"><X size={16} /></button>
+                                    
+                                    <div className="text-center pb-5 mb-5 border-b border-black/5">
+                                        <div className="w-14 h-14 rounded-full bg-[#007AFF]/10 text-[#007AFF] mx-auto flex items-center justify-center mb-3"><Receipt size={24}/></div>
+                                        <h2 className="text-2xl font-black text-[#1D1D1F]">Comprobante de Cierre</h2>
+                                        <p className="text-xs font-bold uppercase tracking-widest text-[#86868B] mt-1">{selectedHistoryItem.marca} {selectedHistoryItem.modelo}</p>
+                                    </div>
+
+                                    <div className="space-y-4">
+                                        <div className="flex justify-between items-center bg-[#F5F5F7] p-4 rounded-2xl">
+                                            <span className="text-sm font-bold text-[#1D1D1F]">1. Ingreso Venta Final</span>
+                                            <span className="text-xl font-black text-[#1D1D1F]">{formatCLP(selectedHistoryItem.precio_venta)}</span>
+                                        </div>
+
+                                        <div className="bg-white border border-black/5 rounded-2xl overflow-hidden">
+                                            <div className="bg-[#FF3B30]/5 px-4 py-3 border-b border-[#FF3B30]/10 flex justify-between items-center">
+                                                <span className="text-xs font-bold text-[#FF3B30]">2. Gastos Pagados (Detalle)</span>
+                                                <span className="text-sm font-black text-[#FF3B30]">-{formatCLP(selectedHistoryItem.gastos_reales)}</span>
+                                            </div>
+                                            <div className="px-4 py-2 space-y-1 bg-[#F5F5F7]">
+                                                {selectedHistoryItem.detalle_gastos && selectedHistoryItem.detalle_gastos.map(g => (
+                                                    <div key={g.id} className="flex justify-between items-center py-1">
+                                                        <span className="text-[11px] font-medium text-[#86868B]">• {g.nombre}</span>
+                                                        <span className="text-[11px] font-bold text-[#1D1D1F]">{formatCLP(g.monto)}</span>
+                                                    </div>
+                                                ))}
+                                                {!selectedHistoryItem.detalle_gastos && <p className="text-[11px] text-[#86868B] italic">No hay detalle registrado.</p>}
+                                            </div>
+                                        </div>
+
+                                        <div className="flex justify-between items-center px-4 py-1">
+                                            <span className="text-xs font-bold text-[#86868B]">Utilidad Bruta Calculada</span>
+                                            <span className="text-base font-black text-[#1D1D1F]">={formatCLP(selectedHistoryItem.utilidad_bruta)}</span>
+                                        </div>
+                                        <div className="h-px bg-black/5 w-full my-1"></div>
+                                        <div className="flex justify-between items-center px-4 py-1">
+                                            <span className="text-[10px] font-black text-[#FF9500] uppercase tracking-widest">Reserva Imprevistos</span>
+                                            <span className="text-sm font-bold text-[#FF9500]">-{formatCLP(selectedHistoryItem.reserva_imprevistos)}</span>
+                                        </div>
+                                        <div className="flex justify-between items-center px-4 py-1">
+                                            <span className="text-[10px] font-black text-[#007AFF] uppercase tracking-widest">Aporte Fondo Libre</span>
+                                            <span className="text-sm font-bold text-[#007AFF]">-{formatCLP(selectedHistoryItem.fondo_ops)}</span>
+                                        </div>
+                                        <div className="flex justify-between items-center bg-[#34C759]/10 p-5 rounded-2xl mt-4">
+                                            <span className="text-xs font-black text-[#34C759] uppercase tracking-widest">Ganancia Neta</span>
+                                            <span className="text-3xl font-black text-[#34C759]">{formatCLP(selectedHistoryItem.utilidad_neta)}</span>
+                                        </div>
+                                    </div>
+                                    <div className="mt-6 text-center"><p className="text-[9px] text-[#86868B] font-bold uppercase tracking-widest">Cierre registrado el {formatDate(selectedHistoryItem.fecha_venta)}</p></div>
+                                </motion.div>
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
+
+                    {/* MODAL AGREGAR VEHÍCULO */}
+                    <AnimatePresence>
+                        {isAdding && (
+                            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[100] bg-black/40 backdrop-blur-md flex items-center justify-center p-4">
+                                <motion.div initial={{ scale: 0.95, y: 10 }} animate={{ scale: 1, y: 0 }} className="glass-panel w-full max-w-5xl p-8 rounded-[2.5rem] bg-white max-h-[95vh] flex flex-col shadow-2xl">
+                                    <div className="flex justify-between items-center mb-6 flex-shrink-0">
+                                        <div>
+                                            <h2 className="text-3xl font-black tracking-tight text-[#1D1D1F]">Agregar Vehículo</h2>
+                                            <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#86868B] mt-1">Registro y Evaluación Clínica</p>
+                                        </div>
+                                        <button onClick={() => setIsAdding(false)} className="w-10 h-10 rounded-full bg-[#F5F5F7] flex items-center justify-center text-[#86868B] hover:bg-[#E9E9EB] transition-colors"><X size={20} /></button>
+                                    </div>
+                                    
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8 overflow-y-auto pr-2 pb-2 custom-scroll flex-grow">
+                                        <div className="space-y-6">
+                                            <div className="glass-panel p-6 rounded-2xl bg-[#F5F5F7] border-none">
+                                                <label className="text-[10px] font-black text-[#86868B] uppercase tracking-widest block mb-4 flex items-center gap-2"><Car size={14}/> Base de Identificación</label>
+                                                <div className="space-y-3">
+                                                    <div className="flex gap-3">
+                                                        <div className="w-1/2">
+                                                            <label className="text-[9px] font-bold text-[#86868B] uppercase pl-1">Fecha Ingreso</label>
+                                                            <input type="date" value={newVeh.fecha_ingreso} onChange={(e) => setNewVeh({...newVeh, fecha_ingreso: e.target.value})} className="w-full glass-input p-3 rounded-xl font-medium text-[#1D1D1F] bg-white" />
+                                                        </div>
+                                                        <div className="w-1/2">
+                                                            <label className="text-[9px] font-bold text-[#86868B] uppercase pl-1">Estado</label>
+                                                            <select value={newVeh.estado} onChange={e => setNewVeh({...newVeh, estado: e.target.value})} className="w-full glass-input p-3 rounded-xl font-bold text-[#1D1D1F] bg-white appearance-none cursor-pointer">
+                                                                <option value="En revisión">En revisión</option>
+                                                                <option value="En visita">En visita</option>
+                                                                <option value="Aceptado">Aceptado</option>
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                    
+                                                    <div className="flex gap-3 mt-2">
+                                                        <input className="w-1/2 glass-input p-3 rounded-xl font-medium bg-white" placeholder="Marca" value={newVeh.marca} onChange={e=>setNewVeh({...newVeh, marca: e.target.value})} />
+                                                        <input className="w-1/2 glass-input p-3 rounded-xl font-medium bg-white" placeholder="Modelo" value={newVeh.modelo} onChange={e=>setNewVeh({...newVeh, modelo: e.target.value})} />
+                                                    </div>
+                                                    <div className="flex gap-3">
+                                                        <input className="w-1/3 glass-input p-3 rounded-xl font-medium text-center bg-white" placeholder="Año" type="number" value={newVeh.año} onChange={e=>setNewVeh({...newVeh, año: e.target.value})} />
+                                                        <input className="w-2/3 glass-input p-3 rounded-xl font-bold uppercase tracking-widest text-center bg-white" placeholder="PATENTE" value={newVeh.patente} onChange={e=>setNewVeh({...newVeh, patente: e.target.value})} />
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div className="glass-panel p-6 rounded-2xl bg-[#007AFF]/5 border border-[#007AFF]/10">
+                                                <label className="text-[10px] font-black text-[#007AFF] uppercase tracking-widest block mb-4 flex items-center gap-2"><DollarSign size={14}/> Cierre Financiero</label>
+                                                <CurrencyInput className="w-full glass-input p-5 rounded-xl font-black text-3xl bg-white text-[#1D1D1F] text-center shadow-sm" placeholder="$ Precio Compra" value={newVeh.precio_compra} onChange={val => setNewVeh({...newVeh, precio_compra: val})} />
+                                            </div>
+                                        </div>
+
+                                        <div>
+                                            <label className="text-[10px] font-black text-[#86868B] uppercase tracking-widest block mb-3 pl-1 flex items-center gap-2"><Activity size={14}/> Configuración Clínica</label>
+                                            <div className="glass-panel rounded-2xl border border-black/5 overflow-hidden bg-[#F5F5F7]">
+                                                {Object.keys(reparaciones).map(cat => (
+                                                    <div key={cat} className="border-b border-black/5 last:border-0">
+                                                        <div className="px-4 py-2"><span className="text-[9px] font-black text-[#86868B] uppercase tracking-[0.1em]">{cat.replace('_', ' ')}</span></div>
+                                                        <div className="px-4 pb-4 space-y-2">
+                                                            {reparaciones[cat].map(item => (
+                                                                <div key={item.id} className="flex justify-between items-center bg-white p-2.5 rounded-lg border border-black/5 shadow-sm">
+                                                                    <span className="text-[11px] font-medium text-[#1D1D1F]">{item.nombre} {item.tipo === 'porcentaje_compra' && `(${item.valor}%)`}</span>
+                                                                    {item.tipo === 'unidad' ? (
+                                                                        <input type="number" className="w-14 glass-input p-1 rounded-md text-center text-xs font-bold bg-[#F5F5F7]" value={newVeh.repairs[item.id] || ""} placeholder="0" onChange={e => handleRepairCheck(item.id, 'unidad', Number(e.target.value))} />
+                                                                    ) : (
+                                                                        <input type="checkbox" className="w-5 h-5 rounded-md accent-[#007AFF] cursor-pointer" checked={!!newVeh.repairs[item.id]} onChange={e => handleRepairCheck(item.id, 'booleano', e.target.checked)} />
+                                                                    )}
+                                                                </div>
+                                                            ))}
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div className="pt-6 mt-2 flex-shrink-0">
+                                        <button onClick={handleAddVehicle} className="w-full py-5 bg-[#1D1D1F] text-white rounded-2xl font-black text-sm uppercase tracking-widest transition-all flex justify-center items-center gap-2 hover:bg-[#000] shadow-lg"><Check size={18} /> Consolidar Adquisición</button>
+                                    </div>
+                                </motion.div>
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
+
+                    {/* MODAL LIQUIDACIÓN */}
+                    <AnimatePresence>
+                        {saleModal.isOpen && (
+                            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[100] bg-black/40 backdrop-blur-md flex items-center justify-center p-4">
+                                <motion.div initial={{ scale: 0.95, y: 10 }} animate={{ scale: 1, y: 0 }} className="glass-panel w-full max-w-2xl p-8 rounded-[2.5rem] bg-white shadow-2xl flex flex-col max-h-[95vh]">
+                                    <div className="flex justify-between items-center mb-6">
+                                        <div>
+                                            <h2 className="text-3xl font-black text-[#1D1D1F]">Cerrar Operación</h2>
+                                            <p className="text-xs font-bold text-[#86868B] uppercase tracking-widest mt-1">Activo: {saleModal.vehicle?.marca} {saleModal.vehicle?.modelo}</p>
+                                        </div>
+                                        <button onClick={() => setSaleModal({isOpen: false, vehicle: null, price: 0})} className="w-10 h-10 rounded-full bg-[#F5F5F7] flex items-center justify-center text-[#86868B] hover:bg-[#E9E9EB] transition-colors"><X size={20} /></button>
+                                    </div>
+                                    
+                                    <div className="overflow-y-auto custom-scroll pr-2 flex-grow mb-6 space-y-6">
+                                        
+                                        <div className="bg-[#34C759]/10 p-6 rounded-2xl border border-[#34C759]/20">
+                                            <label className="text-[10px] font-black text-[#34C759] uppercase tracking-widest block mb-2">Paso 1: Precio Venta Final</label>
+                                            <CurrencyInput value={saleModal.price} onChange={val => setSaleModal({...saleModal, price: val})} placeholder="$ Ingresa el dinero recibido" className="w-full glass-input p-4 rounded-xl text-center text-3xl font-black bg-white text-[#1D1D1F] shadow-sm" />
+                                        </div>
+
+                                        <div>
+                                            <div className="flex justify-between items-end mb-3">
+                                                <label className="text-[10px] font-black text-[#86868B] uppercase tracking-widest block">Paso 2: Gastos Reales Pagados</label>
+                                                <button onClick={addGastoManual} className="text-[10px] uppercase font-bold text-[#007AFF] bg-[#007AFF]/10 px-3 py-1.5 rounded-lg flex items-center gap-1 hover:bg-[#007AFF]/20 transition-colors"><Plus size={12}/> Añadir Gasto</button>
+                                            </div>
+                                            <div className="bg-[#F5F5F7] rounded-2xl p-3 border border-black/5 space-y-2">
+                                                {gastosManuales.map((gasto, index) => (
+                                                    <div key={gasto.id} className="flex gap-2 items-center bg-white p-2 rounded-xl border border-black/5">
+                                                        <span className="text-[#86868B] text-xs font-bold w-6 text-center">{index + 1}.</span>
+                                                        <input 
+                                                            className="flex-1 glass-input p-2 rounded-lg font-medium text-sm border-none bg-transparent" 
+                                                            placeholder="Descripción del gasto..." 
+                                                            value={gasto.nombre} 
+                                                            onChange={(e) => updateGastoManual(gasto.id, 'nombre', e.target.value)}
+                                                        />
+                                                        <div className="w-32">
+                                                            <CurrencyInput 
+                                                                className="w-full glass-input p-2 rounded-lg font-bold text-sm text-right bg-[#F5F5F7] border border-black/5" 
+                                                                placeholder="$ 0" 
+                                                                value={gasto.monto} 
+                                                                onChange={(val) => updateGastoManual(gasto.id, 'monto', val)}
+                                                            />
+                                                        </div>
+                                                        <button onClick={() => removeGastoManual(gasto.id)} className="w-8 h-8 rounded-lg bg-[#FF3B30]/10 text-[#FF3B30] flex items-center justify-center hover:bg-[#FF3B30] hover:text-white transition-colors"><Trash2 size={14}/></button>
+                                                    </div>
+                                                ))}
+                                                {gastosManuales.length === 0 && <p className="text-xs text-center text-[#86868B] py-4">No hay gastos registrados. Añade al menos la compra.</p>}
+                                                
+                                                <div className="flex justify-between items-center px-4 pt-3 mt-2 border-t border-black/10">
+                                                    <span className="text-xs font-black text-[#1D1D1F] uppercase tracking-widest">Total Gastos:</span>
+                                                    <span className="text-lg font-black text-[#FF3B30]">{formatCLP(gastosManuales.reduce((acc, g) => acc + Number(g.monto), 0))}</span>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                    
+                                    <div className="flex-shrink-0 pt-4 border-t border-black/5">
+                                        <button onClick={handleLiquidationSubmit} className="w-full py-5 bg-[#1D1D1F] rounded-2xl font-black text-sm uppercase tracking-widest text-white hover:bg-[#000] shadow-xl transition-all flex justify-center items-center gap-2">Liquidar Operación <CheckCircle2 size={18}/></button>
+                                    </div>
+                                </motion.div>
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
+
+                    {/* OVERLAY MAGIC BOX (CIERRE FINAL) */}
+                    <AnimatePresence>
+                        {isClosing && closingData && (
+                            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[120] bg-white/95 backdrop-blur-xl flex items-center justify-center p-6">
+                                <div className="max-w-4xl w-full text-center">
+                                    <motion.div initial={{ scale: 0.9, y: 20 }} animate={{ scale: 1, y: 0 }}>
+                                        <div className="w-28 h-28 bg-[#007AFF] rounded-[2rem] mx-auto flex items-center justify-center shadow-xl mb-8 relative">
+                                            <Calculator size={48} className="text-white" />
+                                        </div>
+                                        <h2 className="text-5xl font-black mb-3 text-[#1D1D1F] tracking-tight">Liquidación Procesada</h2>
+                                        <p className="text-[#86868B] font-bold tracking-widest uppercase text-xs">Distribuyendo fondos a tus cuentas...</p>
+                                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-12">
+                                            <GlassCard className="p-8 rounded-[2rem] text-left bg-[#F5F5F7] border-none" noHover>
+                                                <p className="text-[#86868B] text-[10px] font-black uppercase mb-2 tracking-widest">Margen Bruto</p>
+                                                <p className="text-4xl font-black text-[#1D1D1F]">{formatCLP(closingData.bruto)}</p>
+                                            </GlassCard>
+                                            <GlassCard className="p-8 rounded-[2rem] text-left bg-[#007AFF]/5 border border-[#007AFF]/10" noHover>
+                                                <p className="text-[#007AFF] text-[10px] font-black uppercase mb-2 tracking-widest">Fondo Libre (Ops)</p>
+                                                <p className="text-4xl font-black text-[#007AFF]">{formatCLP(closingData.fondo_ops)}</p>
+                                            </GlassCard>
+                                            <GlassCard className="p-8 rounded-[2rem] text-left bg-[#34C759] shadow-xl transform scale-105 border-none" noHover>
+                                                <p className="text-white/80 text-[10px] font-black uppercase mb-2 tracking-widest">Directo a tu Bolsillo</p>
+                                                <p className="text-4xl font-black text-white">{formatCLP(closingData.utilidad_neta)}</p>
+                                            </GlassCard>
+                                        </div>
+                                    </motion.div>
+                                </div>
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
+                    
+                    {/* BOTÓN FLOTANTE AI */}
+                    <button onClick={() => setAiOpen(!aiOpen)} className="fixed bottom-8 right-8 z-[60] w-14 h-14 rounded-full bg-[#1D1D1F] text-white flex items-center justify-center shadow-2xl hover:scale-105 transition-transform">
+                        {aiOpen ? <X size={24} /> : <MessageSquare size={24} />}
+                    </button>
+                    <AnimatePresence>
+                        {aiOpen && (
+                            <motion.div initial={{ opacity: 0, y: 20, scale: 0.95 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 20, scale: 0.95 }} className="fixed bottom-24 right-8 w-full max-w-[360px] z-[60] pointer-events-auto">
+                                <div className="glass-panel rounded-3xl bg-white shadow-2xl flex flex-col overflow-hidden h-[500px] border border-black/5">
+                                    <div className="p-4 border-b border-black/5 flex items-center gap-2 bg-[#F5F5F7]">
+                                        <div className="w-2.5 h-2.5 bg-[#007AFF] rounded-full"></div>
+                                        <span className="text-[10px] font-bold uppercase tracking-widest text-[#86868B]">Asistente DriveLab</span>
+                                    </div>
+                                    <div className="flex-1 overflow-y-auto p-5 space-y-4 flex flex-col custom-scroll">
+                                        {aiMessages.map((m, i) => (
+                                            <div key={i} className={`flex flex-col ${m.role === 'user' ? 'items-end' : 'items-start'}`}>
+                                                <div className={`ai-chat-bubble ${m.role === 'user' ? 'ai-user' : 'ai-bot'}`}>{m.text}</div>
+                                            </div>
+                                        ))}
+                                        <div ref={chatEndRef} />
+                                    </div>
+                                    <div className="p-3 border-t border-black/5 bg-white">
+                                        <form onSubmit={handleAiSubmit} className="flex items-center gap-2">
+                                            <input type="text" value={aiInput} onChange={(e) => setAiInput(e.target.value)} placeholder="iMessage" className="bg-white border border-black/10 rounded-full px-4 outline-none w-full text-sm font-medium text-[#1D1D1F] placeholder:text-[#86868B] h-10 focus:border-[#007AFF]" />
+                                            <button type="submit" className="w-10 h-10 rounded-full bg-[#007AFF] text-white flex items-center justify-center flex-shrink-0"><ArrowUpRight size={18}/></button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
