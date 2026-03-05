@@ -153,17 +153,30 @@
             return "$" + cleanNum.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
         };
 
-        const CurrencyInput = ({ value, onChange, placeholder, className }) => {
-            const [display, setDisplay] = useState(value ? formatCLP(value) : "");
-                if (inventory.length === 0) {useEffect(() => { setDisplay(value ? formatCLP(value) : ""); }, [value]);
-            const handleChange = (e) => {
-                let raw = e.target.value.replace(/\D/g, '');
-                setDisplay(raw ? formatCLP(raw) : "");
-                onChange(raw ? Number(raw) : 0);
-            };
-            return <input type="text" value={display} onChange={handleChange} placeholder={placeholder} className={className} />;
-        };
+      const CurrencyInput = ({ value, onChange, placeholder, className }) => {
+    const [display, setDisplay] = useState(value ? formatCLP(value) : "");
+    
+    // El "useEffect" debe ir suelto, nunca dentro de un "if"
+    useEffect(() => { 
+        setDisplay(value ? formatCLP(value) : ""); 
+    }, [value]);
 
+    const handleChange = (e) => {
+        let raw = e.target.value.replace(/\D/g, '');
+        setDisplay(raw ? formatCLP(raw) : "");
+        onChange(raw ? Number(raw) : 0);
+    };
+
+    return (
+        <input 
+            type="text" 
+            value={display} 
+            onChange={handleChange} 
+            placeholder={placeholder} 
+            className={className} 
+        />
+    );
+};
         const App = () => {
             const [view, setView] = useState('dashboard');
             const [inventory, setInventory] = useState([]);
