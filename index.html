@@ -155,7 +155,7 @@
 
         const CurrencyInput = ({ value, onChange, placeholder, className }) => {
             const [display, setDisplay] = useState(value ? formatCLP(value) : "");
-            useEffect(() => { setDisplay(value ? formatCLP(value) : ""); }, [value]);
+                if (inventory.length === 0) {useEffect(() => { setDisplay(value ? formatCLP(value) : ""); }, [value]);
             const handleChange = (e) => {
                 let raw = e.target.value.replace(/\D/g, '');
                 setDisplay(raw ? formatCLP(raw) : "");
@@ -233,15 +233,19 @@
             const [filterDateStart, setFilterDateStart] = useState('');
             const [filterDateEnd, setFilterDateEnd] = useState('');
 
-            useEffect(() => {
-                if (inventory.length === 0) {
-                    setInventory([
-                        { id: 'demo-1', marca: 'Chevrolet', modelo: 'Corsa', año: 2004, patente: 'DRIVE-01', rank: 'A', estado: 'En visita', precio_compra: 1400000, 
-                          desglose_costos: { rep: 80000, leg: 46000, imp: 70000, mkt: 15000, total: 211000 }, costos_estimados: 211000, fecha_ingreso: new Date(Date.now() - 432000000).toISOString() },
-                        { id: 'demo-2', marca: 'Kia', modelo: 'Morning', año: 2012, patente: 'LABOS-22', rank: 'S', estado: 'Aceptado', precio_compra: 2800000, 
-                          desglose_costos: { rep: 120000, leg: 67000, imp: 140000, mkt: 15000, total: 342000 }, costos_estimados: 342000, fecha_ingreso: new Date(Date.now() - 1500000000).toISOString() }
-                    ]);
-                }
+                if (inventory.length === 0)useEffect(() => {
+                // Conexión real a tu servidor en Render para buscar los vehículos
+                fetch('https://drivelab-os-1.onrender.com/api/vehiculos')
+                    .then(response => response.json())
+                    .then(data => {
+                        setInventory(data);
+                    })
+                    .catch(error => {
+                        console.error('Error de conexión:', error);
+                        // Si algo falla, mostramos el Corsa de prueba para que no quede en blanco
+                        setInventory([{ id: 'demo-1', marca: 'Chevrolet', modelo: 'Corsa', año: 2004, estado: 'En visita', precio_compra: 1400000, desglose_costos: { rep: 0, leg: 0, imp: 0, mkt: 0, total: 0 }, costos_estimados: 0 }]);
+                    });
+
                 if (history.length === 0) {
                     setHistory([
                         { 
