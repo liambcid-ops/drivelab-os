@@ -233,19 +233,20 @@
             const [filterDateStart, setFilterDateStart] = useState('');
             const [filterDateEnd, setFilterDateEnd] = useState('');
 
-                if (inventory.length === 0)useEffect(() => {
-                // Conexión real a tu servidor en Render para buscar los vehículos
-                fetch('https://drivelab-os-1.onrender.com/api/vehiculos')
+useEffect(() => {
+                // 1. Conexión real a tu servidor en Render
+		fetch('/api/vehiculos')
                     .then(response => response.json())
                     .then(data => {
                         setInventory(data);
                     })
                     .catch(error => {
                         console.error('Error de conexión:', error);
-                        // Si algo falla, mostramos el Corsa de prueba para que no quede en blanco
+                        // Modo seguro en caso de error
                         setInventory([{ id: 'demo-1', marca: 'Chevrolet', modelo: 'Corsa', año: 2004, estado: 'En visita', precio_compra: 1400000, desglose_costos: { rep: 0, leg: 0, imp: 0, mkt: 0, total: 0 }, costos_estimados: 0 }]);
                     });
 
+                // 2. Historial de prueba
                 if (history.length === 0) {
                     setHistory([
                         { 
@@ -256,9 +257,7 @@
                           detalle_gastos: [
                               { id: 1, nombre: "Compra Vehículo", monto: 4500000 },
                               { id: 2, nombre: "Transferencia e Impuestos", monto: 67500 },
-                              { id: 3, nombre: "Trámite Notarial", monto: 25000 },
-                              { id: 4, nombre: "Detailing", monto: 120000 },
-                              { id: 5, nombre: "Batería Nueva", monto: 45000 }
+                              { id: 3, nombre: "Trámite Notarial", monto: 25000 }
                           ]
                         }
                     ]);
